@@ -1,0 +1,85 @@
+#1. Создать VIEW на основе запросов, которые вы сделали в ДЗ к уроку 3.
+CREATE VIEW `sotr_dep` AS
+SELECT  COUNT(*) AS 'Число сотруднников по отделам', `depart`.`name` AS 'Отдел',
+SUM(`shtat`.`salary`) AS 'ЗП по отделу' 
+FROM `shtat`
+RIGHT JOIN `depart` 
+ON `shtat`.`dept` = `depart`.`id`
+GROUP BY `depart`.`name`;
+
+SELECT * FROM `sotr_dep`;
+
+CREATE VIEW `dep_avg` AS
+SELECT AVG(`shtat`.`salary`) AS 'Средняя зп по отделу', `depart`.`name` AS 'Отдел'
+FROM `shtat` 
+RIGHT JOIN `depart` ON `shtat`.`id` = `depart`.`id`
+GROUP BY `depart`.`name`;
+
+SELECT * FROM `sotr_dep`;
+
+#2. Создать функцию, которая найдет менеджера по имени и фамилии.
+delimiter //
+CREATE PROCEDURE `search_person` (pers_name VARCHAR(25), pers_lastname VARCHAR(30))
+BEGIN
+SELECT `shtat`.`name`, `shtat`.`lastname`, `shtat`.`position`, `shtat`.salary, `depart`.`name` AS 'DEP name'
+FROM `shtat` LEFT JOIN `depart` 
+ON `shtat`.`dept` = `depart`.`id`
+WHERE `shtat`.`name` = pers_name OR `shtat`.`lastname` = pers_lastname;
+END//
+delimiter ;
+
+CALL `search_person`('Петр', 'Козлов');
+
+#Ищет по имени отдельно и по фамилии 
+CALL `search_person`('Петр', '');
+CALL `search_person`('', 'Яров');
+
+#Поправил функцию на LIKE
+DROP PROCEDURE IF EXISTS `search_person` ;
+
+delimiter //
+CREATE PROCEDURE `search_person` (pers_name VARCHAR(25), pers_lastname VARCHAR(30))
+BEGIN
+SELECT `shtat`.`name`, `shtat`.`lastname`, `shtat`.`position`, `shtat`.salary, `depart`.`name` AS 'DEP name'
+FROM `shtat` LEFT JOIN `depart` 
+ON `shtat`.`dept` = `depart`.`id`
+WHERE `shtat`.`name` LIKE pers_name OR `shtat`.`lastname` LIKE pers_lastname;
+END//
+delimiter ;
+
+#3. Создать триггер, который при добавлении нового сотрудника будет выплачивать ему вступительный бонус, занося запись об этом в таблицу salary.
+CREATE TABLE IF NOT EXISTS `salary` (
+`id` INT NOT NULL AUTO_INCREMENT,
+`name` VARCHAR(25) NOT NULL,
+`lastname` VARCHAR(30) NOT NULL,
+`dept` INT,
+`salary` INT,
+`bonus` INT,
+PRIMARY KEY (`id`))
+DEFAULT CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `salary` (
+`id` INT NOT NULL AUTO_INCREMENT,
+`id_sotr` INT,
+`salary` INT,
+`bonus` INT DEFAULT 0,
+PRIMARY KEY (`id`))
+DEFAULT CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+ALTER TABLE `salary` 
+ADD CONSTRAINT `salary_sotr` FOREIGN KEY (`id_sotr`)
+REFERENCES `shtat`(`id`)
+ON UPDATE CASCADE
+ON DELETE RESTRICT;
+
+ALTER TABLE `salary` RENAME `bonus`;
+
+CREATE TRIGGER `bonus_trig`
+AFTER INSERT ON `shtat`
+FOR EACH ROW
+INSERT INTO `bonus` (`bonus`, `id_sotr`) VALUES (5000, NEW.id);
+
+#Проверяем 
+INSERT INTO `shtat` 
+(`name`,`lastname`,`dept`,`salary`,`position`) VALUES
+('Егор','Богатый',1,25000,' Бухгалтер');

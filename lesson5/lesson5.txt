@@ -1,0 +1,49 @@
+USE `lesson3`;
+UPDATE `shtat` SET `id` = 1 WHERE `Name`= 'Егор';
+TRUNCATE `bonus`;
+INSERT INTO `bonus` (`id_sotr`, `bonus`) VALUES
+(3, 3000);
+
+
+#разделим бонус между коллегами бухгалетрами
+BEGIN;
+UPDATE `bonus` SET `bonus` = `bonus` - 2000 WHERE `id_sotr` = 3;
+INSERT INTO `bonus` (`id_sotr`, `bonus`) VALUES
+(1, 1000)
+(2, 1000);
+COMMIT;
+
+#уволим главу маркетинга и выплатим ей бонус в три зарплаты
+BEGIN;
+SET @a = (SELECT `salary` FROM `shtat` WHERE `id`= 8);
+INSERT INTO `bonus` (`id_sotr`, `bonus`) VALUES
+(8, 3*@a);
+DELETE FROM `shtat` WHERE `id` = 8;
+COMMIT;
+
+
+mysql> EXPLAIN `shtat`;
++----------+-------------+------+-----+---------+----------------+
+| Field    | Type        | Null | Key | Default | Extra          |
++----------+-------------+------+-----+---------+----------------+
+| id       | int(11)     | NO   | PRI | NULL    | auto_increment |
+| name     | varchar(25) | NO   | MUL | NULL    |                |
+| lastname | varchar(30) | NO   |     | NULL    |                |
+| dept     | int(11)     | YES  | MUL | NULL    |                |
+| salary   | int(11)     | YES  |     | NULL    |                |
+| position | varchar(50) | YES  |     | NULL    |                |
++----------+-------------+------+-----+---------+----------------+
+6 rows in set (0,00 sec)
+
+
+mysql> EXPLAIN SELECT MAX(`salary`) AS 'Максмальная зп сотрудника'  FROM `shtat`;
++----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+-------+
+| id | select_type | table | partitions | type | possible_keys | key  | key_len | ref  | rows | filtered | Extra |
++----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+-------+
+|  1 | SIMPLE      | shtat | NULL       | ALL  | NULL          | NULL | NULL    | NULL |   11 |   100.00 | NULL  |
++----+-------------+-------+------------+------+---------------+------+---------+------+------+----------+-------+
+1 row in set, 1 warning (0,00 sec)
+
+
+
+

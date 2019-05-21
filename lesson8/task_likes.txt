@@ -1,0 +1,25 @@
+# задача 1.
+
+CREATE DATABASE likes;
+
+USE likes;
+
+CREATE TABLE users (
+id INT AUTO_INCREMENT,
+name VARCHAR(255),
+PRIMARY KEY (id));
+
+CREATE TABLE likes (
+id INT AUTO_INCREMENT,
+id_user_liked INT,
+id_user_likes INT,
+PRIMARY KEY (id),
+CONSTRAINT fkey_User_Likes FOREIGN KEY (id_user_likes)
+REFERENCES users(id)
+ON DELETE CASCADE,
+CONSTRAINT fkey_User_Liked FOREIGN KEY (id_user_liked)
+REFERENCES users(id)
+ON DELETE CASCADE);
+
+
+

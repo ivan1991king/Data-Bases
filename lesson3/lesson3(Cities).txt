@@ -1,0 +1,95 @@
+TRUNCATE TABBLE _cities;
+
+#ура, теперь заработал
+
+ALTER TABLE `_cities`
+
+ADD CONSTRAINT `city_country` FOREIGN KEY (`country_id`)
+REFERENCES `_countries`(`id`)
+ON UPDATE CASCADE
+ON DELETE RESTRICT,
+
+ADD CONSTRAINT `city_region` FOREIGN KEY (`region_id`)
+REFERENCES `_regions`(`id`)
+ON UPDATE CASCADE
+ON DELETE RESTRICT;
+
+
+
+
+INSERT INTO `_cities` 
+(`country_id`,`important`,`region_id`,`title`) VALUES
+(1,0,1,'Благовещенск'),
+(1,0,1,'Свободный'),
+(1,0,2,'Владимир'),
+(1,0,2,'Покров'),
+(1,1,3,'Москва'),
+(1,0,3,'Зеленоград'),
+(2,0,1,'Жирона'),
+(2,0,1,'Барселона'),
+(2,0,2,'Санта-Крус-де-Тенерифе'),
+(2,0,2,'Лас-Пальмас-де-Гран-Канария'),
+(2,0,3,'Валенсия'),
+(2,0,3,'Аликанте'),
+(3,0,1,'Лос-Анджелес'),
+(3,0,1,'Сан-Франциско'),
+(3,0,2,'Хьюстон'),
+(3,0,2,'Даллас'),
+(3,0,3,'Бирменгем'),
+(3,0,3,'Монтгомери');
+
+#Исправляем порядок стран и id регионов
+
+UPDATE `_countries` SET `title` = 'Россия' WHERE `id` = 1;
+UPDATE `_countries` SET `title` = 'Испания' WHERE `id` = 2;
+
+UPDATE `_regions` SET `id` = 4 WHERE `title` = 'Каталония';
+UPDATE `_regions` SET `id` = 5 WHERE `title` = 'Канарсие острова';
+UPDATE `_regions` SET `id` = 6 WHERE `title` = 'Валенсия';
+UPDATE `_regions` SET `id` = 7 WHERE `title` = 'Калифорния';
+UPDATE `_regions` SET `id` = 8 WHERE `title` = 'Техас';
+UPDATE `_regions` SET `id` = 9 WHERE `title` = 'Алабама';
+
+#Исправляю таблицу ситис
+
+UPDATE `_cities` SET `region_id` = 1 WHERE `title` = 'Благовещенск';
+UPDATE `_cities` SET `region_id` = 1 WHERE `title` = 'Свободный';
+UPDATE `_cities` SET `region_id` = 2 WHERE `title` = 'Владимир';
+UPDATE `_cities` SET `region_id` = 2 WHERE `title` = 'Покров';
+UPDATE `_cities` SET `region_id` = 3 WHERE `title` = 'Москва';
+UPDATE `_cities` SET `region_id` = 3 WHERE `title` = 'Зеленоград';
+UPDATE `_cities` SET `region_id` = 4 WHERE `title` = 'Жирона';
+UPDATE `_cities` SET `region_id` = 4 WHERE `title` = 'Барселона';
+UPDATE `_cities` SET `region_id` = 5 WHERE `title` = 'Санта-Крус-де-Тенерифе';
+UPDATE `_cities` SET `region_id` = 5 WHERE `title` = 'Лас-Пальмас-де-Гран-Канария';
+UPDATE `_cities` SET `region_id` = 6 WHERE `title` = 'Валенсия';
+UPDATE `_cities` SET `region_id` = 6 WHERE `title` = 'Аликанте';
+UPDATE `_cities` SET `region_id` = 7 WHERE `title` = 'Лос-Анджелес';
+UPDATE `_cities` SET `region_id` = 7 WHERE `title` = 'Сан-Франциско';
+UPDATE `_cities` SET `region_id` = 8 WHERE `title` = 'Хьюстон';
+UPDATE `_cities` SET `region_id` = 8 WHERE `title` = 'Даллас';
+UPDATE `_cities` SET `region_id` = 9 WHERE `title` = 'Бирменгем';
+UPDATE `_cities` SET `region_id` = 9 WHERE `title` = 'Монтгомери';
+
+#И наконец-то работает
+# 1. Сделать запрос, в котором мы выберем все данные о городе – регион, страна.
+
+SELECT `_cities`.`title` AS 'Город', `_regions`.`title` AS 'Регион/Штат', 
+`_countries`.`title` AS 'Страна'
+FROM `_cities` 
+RIGHT JOIN `_countries`
+ON `_cities`.`country_id` = `_countries`.`id`
+RIGHT JOIN `_regions`
+ON `_cities`.`region_id` = `_regions`.`id`;
+
+#2. Выбрать все города из Московской области.
+
+SELECT `_cities`.`title` AS 'Города Моcковской области' FROM `_cities` 
+WHERE `region_id` = 
+(SELECT `id` FROM `_regions` WHERE `title` = 'Московская область')
+
+
+
+
+
+

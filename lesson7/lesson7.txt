@@ -1,0 +1,61 @@
+###Создаем юера и наделяем его привилегиями:
+mysql> CREATE USER IF NOT EXISTS 'ivan'@'%' IDENTIFIED WITH mysql_native_password BY '123123';
+Query OK, 0 rows affected (0,12 sec)
+
+mysql> GRANT ALL PRIVILEGES ON `lesson_1`.* TO 'ivan'@'%' WITH GRANT OPTION;
+Query OK, 0 rows affected (0,04 sec)
+
+mysql> FLUSH PRIVILEGES;
+Query OK, 0 rows affected (0,00 sec)
+
+mysql> QUIT
+Bye
+root@MySQL8:~/Рабочий стол# mysql -u ivan -p123123
+
+mysql> SELECT * FROM `lesson_1`.`_regions`;
++----+-----------------------------------------+------------+
+| id | title                                   | country_id |
++----+-----------------------------------------+------------+
+|  1 | Амурская область                        |          1 |
+|  2 | Владимирская область                    |          1 |
+|  3 | Московская область                      |          1 |
+|  4 | Каталония                               |          2 |
+|  5 | Канарсие острова                        |          2 |
+|  6 | Валенсия                                |          2 |
+|  7 | Калифорния                              |          3 |
+|  8 | Техас                                   |          3 |
+|  9 | Алабама                                 |          3 |
++----+-----------------------------------------+------------+
+9 rows in set (0,09 sec)
+
+### Создаем бэкап
+root@MySQL8://# mysqldump -u root -p123123 lesson3 > /var/back_`date '+%Y.%m.%d'`.sql
+mysqldump: [Warning] Using a password on the command line interface can be insecure.
+root@MySQL8://# mysql -u root -p123123
+
+mysql> DROP SCHEMA `lesson3`;
+Query OK, 5 rows affected (0,23 sec)
+
+mysql> CREATE SCHEMA `lesson3`;
+Query OK, 1 row affected (0,04 sec)
+
+root@MySQL8:/# mysql -u root -p123123 lesson3 < /var/back_2019.04.29.sqlmysql: [Warning] Using a password on the command line interface can be insecure.
+root@MySQL8:/# mysql -u root -p123123
+
+mysql> SELECT * FROM `lesson3`.`shtat`;
++----+--------------------+--------------------+------+--------+--------------------------------------+
+| id | name               | lastname           | dept | salary | position                             |
++----+--------------------+--------------------+------+--------+--------------------------------------+
+|  1 | Егор               | Богатый            |    1 |  25000 | Бухгалтер                           |
+|  2 | Владимир           | Питерский          |    1 |  50000 | Бухгалтер                            |
+|  3 | Светлана           | Музыка             |    1 |  55000 | Бухгалтер                            |
+|  4 | Андрей             | Юрченко            |    2 |  60000 | Менеджер по рекламе                  |
+|  5 | Екатерина          | Фомина             |    2 |  48000 | Менеджер по рекламе                  |
+|  7 | Петр               | Козлов             |    3 |  60000 | Маркетолог                           |
+|  9 | Семен              | Фокин              |    3 |  62000 | Маркетолог                           |
+| 10 | Влад               | Герасимов          |    4 |  70000 | Программист                          |
+| 11 | Тимур              | Яров               |    4 |  75000 | Программист                          |
+| 12 | Рамис              | Литвенко           |    4 |  75000 | Программист                          |
+| 13 | Иван               | Таранов            |    4 |  80000 | Глава разработки                     |
++----+--------------------+--------------------+------+--------+--------------------------------------+
+11 rows in set (0,01 sec)

@@ -1,0 +1,88 @@
+CREATE DATABASE IF NOT EXISTS `lesson3` 
+DEFAULT CHAR SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+USE `lesson3`;
+
+CREATE TABLE IF NOT EXISTS `depart` (
+`id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+`name` VARCHAR(40) NOT NULL,
+`count` INT DEFAULT 0,
+`head_id` INT );
+
+CREATE TABLE IF NOT EXISTS `shtat` (
+`id` INT NOT NULL AUTO_INCREMENT,
+`name` VARCHAR(25) NOT NULL,
+`lastname` VARCHAR(30) NOT NULL,
+`dept` INT,
+`salary` INT,
+`position` VARCHAR(50),
+PRIMARY KEY (`id`)
+)DEFAULT CHARSET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+ALTER TABLE `shtat` 
+ADD UNIQUE INDEX `fullname` (`name`, `lastname`);
+
+CREATE INDEX `dep_index` ON `shtat`(`dept`);
+
+ALTER TABLE `shtat` 
+ADD CONSTRAINT `dept_sotr` FOREIGN KEY (`dept`)
+REFERENCES `depart`(`id`)
+ON UPDATE CASCADE
+ON DELETE RESTRICT;
+
+ALTER TABLE `depart`
+MODIFY COLUMN `head_id` int(11) DEFAULT NULL;
+
+INSERT INTO `depart` 
+(`name`, `count`) VALUES 
+('Бухгалтерия', 3),
+('Реклама', 2),
+('Маркетинг', 4),
+('Разработка', 5);
+
+INSERT INTO `shtat` 
+(`name`,`lastname`,`dept`,`salary`,`position`) VALUES
+('Анатолий','Башлыков',1,45000,' Бухгалтер'),
+('Владимир','Питерский',1,50000,'Бухгалтер'),
+('Светлана','Музыка',1,55000,'Бухгалтер'),
+('Андрей','Юрченко',2,60000,'Менеджер по рекламе'),
+('Екатерина','Фомина',2,48000,'Менеджер по рекламе'),
+('Елизавета','Красная',3,55000,'Маркетолог'),
+('Петр','Козлов',3,60000,'Маркетолог'),
+('Галина','Иванова',3,75000,'Глава маркетинга'),
+('Семен','Фокин',3,62000,'Маркетолог'),
+('Влад','Герасимов',4,70000,'Программист'),
+('Тимур','Яров',4,75000,'Программист'),
+('Рамис','Литвенко',4,75000,'Программист'),
+('Иван','Таранов',4,80000,'Глава разработки');
+
+UPDATE `depart` SET `head_id` = 8 WHERE `id`= 3;
+UPDATE `depart` SET `head_id` = 13 WHERE `id`= 4;
+
+#1. Выбрать среднюю зарплату по отделам.
+SELECT AVG(`shtat`.`salary`) AS 'Средняя зп по отделу', `depart`.`name` AS 'Отдел'
+FROM `shtat` 
+RIGHT JOIN `depart` ON `shtat`.`id` = `depart`.`id`
+GROUP BY `depart`.`name`;
+
+#2. Выбрать максимальную зарплату у сотрудника.
+SELECT MAX(`salary`) AS 'Максмальная зп сотрудника'  FROM `shtat`;
+
+#3. Удалить одного сотрудника, у которого максимальная зарплата.
+SET SQL_SAFE_UPDATES = 0;
+DELETE FROM `shtat` WHERE `salary` = (SELECT MIN(`salary`)) LIMIT 1;
+SET SQL_SAFE_UPDATES = 1;
+
+#4. Посчитать количество сотрудников во всех отделах.
+SELECT COUNT(*) AS 'Число сотруднников по отделам', `depart`.`name` FROM `shtat`
+RIGHT JOIN `depart` 
+ON `shtat`.`dept` = `depart`.`id`
+GROUP BY `depart`.`name`;
+
+#5. Найти количество сотрудников в отделах и посмотреть, сколько всего денег получает отдел.
+SELECT COUNT(*) AS 'Число сотруднников по отделам', `depart`.`name` AS 'Отдел',
+SUM(`shtat`.`salary`) AS 'ЗП по отделу' 
+FROM `shtat`
+RIGHT JOIN `depart` 
+ON `shtat`.`dept` = `depart`.`id`
+GROUP BY `depart`.`name`;
